@@ -16,8 +16,8 @@ def send_message_to_me(sender, message):
 
 
 # Функция возвращающая корректное время в определённом формате
-def get_current_time():
-    return f"[{datetime.now().strftime('%d/%m/%Y, %H:%M')}] "
+def print_with_time(text):
+    return print(f"[{datetime.now().strftime('%d/%m/%Y, %H:%M')}] {text}")
 
 
 # Функция для обновления файла (Синтаксис из VBA, за счёт библиотеки)
@@ -35,24 +35,20 @@ def update_excel_file(path_file):
 # Функция полного обновления отчётности
 def update_all(my_excel_files):
     for excel_file in my_excel_files:
-        print(f"{get_current_time()}Обновляем файл {excel_file.split('\\')[-1]}")
+        print_with_time(f"Обновляем файл {excel_file.split('\\')[-1]}")
         update_excel_file(excel_file)
 
     # отправляем сообщение
-    print(f"{get_current_time()}Сообщение отправлено")
+    print_with_time("Сообщение отправлено")
     send_message_to_me(mail, "Успешно обновили файлы")
 
 
 # outlook = win32.Dispatch("outlook.application")
 
-print(
-    f"{get_current_time()}Данный скрипт предназначен для автоматического обновления отчётов Excel"
-)
-print(
-    f"{get_current_time()}В папке с этим скриптом должен находится один текстовый файл с путями к excel файлам"
-)
+print_with_time("Данный скрипт предназначен для автоматического обновления отчётов Excel")
+print_with_time("В папке с этим скриптом должен находится один текстовый файл с путями к excel файлам")
 
-mail = input(f"{get_current_time()}Введите почту на которую будет отправленно сообщение: ")
+mail = input(f"[{datetime.now().strftime('%d/%m/%Y, %H:%M')}] Введите почту на которую будет отправленно сообщение: ")
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -60,20 +56,20 @@ while True:
     txt_files = [f for f in os.listdir(current_dir) if f.endswith('.txt')]
 
     if not txt_files:
-        print(f'{get_current_time()}Нет текстовых файлов')
+        print_with_time("Нет текстовых файлов")
     elif len(txt_files) == 1:
-        print(f"{get_current_time()}Найден файл {txt_files[0]}")
+        print_with_time("Найден файл {txt_files[0]}")
         file_path = os.path.join(current_dir, txt_files[0])
         with open(file_path, 'r', encoding='utf-8') as file:
             excel_files = [e.strip() for e in file.readlines() if os.path.exists(e.strip()) and e.strip().endswith('.xlsx')]
         
         if not excel_files:
-            print(f'{get_current_time()}В файле нет корректный путей.')
+            print_with_time("В файле нет корректный путей.")
         else:
-            print(f'{get_current_time()}Начинаю обновлять файлы')
+            print_with_time("Начинаю обновлять файлы")
             break
     else:
-        print(f"{get_current_time()}Файлов два и более, оставьте один")
+        print_with_time("Файлов два и более, оставьте один")
     
     sleep(15)
 
