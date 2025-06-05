@@ -18,4 +18,3 @@
 
 ## Пример содержимого txt файла
 C:\Reports\report_1.xlsx
-D:\Projects\my_data.xlsx
