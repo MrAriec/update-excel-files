@@ -1,14 +1,8 @@
-import teradatasql
-import time
 import win32com.client as win32
 import os
-import schedule
-import pandas as pd
 
 from time import sleep
 from datetime import datetime
-from getpass import getpass
-
 
 # Функция для отправки сообщения на почту
 def send_message_to_me(sender, message):
@@ -23,7 +17,7 @@ def send_message_to_me(sender, message):
 
 # Функция возвращающая корректное время в определённом формате
 def get_current_time():
-    return f"[{datetime.now().strftime("%d/%m/%Y, %H:%M")}] "
+    return f"[{datetime.now().strftime('%d/%m/%Y, %H:%M')}] "
 
 
 # Функция для обновления файла (Синтаксис из VBA, за счёт библиотеки)
@@ -38,51 +32,49 @@ def update_excel_file(path_file):
     xlapp.Quit()
 
 
-# Функция полного обновления отчётности (Определение недели, внесение новой недели в БД и обновление отчётов)
-def update_all():
-
-    # обновляем файлы
-    for excel_file in excel_files:
+# Функция полного обновления отчётности
+def update_all(my_excel_files):
+    for excel_file in my_excel_files:
         print(f"{get_current_time()}Обновляем файл {excel_file.split('\\')[-1]}")
         update_excel_file(excel_file)
 
     # отправляем сообщение
     print(f"{get_current_time()}Сообщение отправлено")
-    send_message_to_me(mail, "Успешно внесли неделю и обновили файлы")
+    send_message_to_me(mail, "Успешно обновили файлы")
 
 
-# Строка, которая заменяется на актуальную неделю
-replace_str = "REPORT_WEEK"
-mail = "faryshev_da@magnit.ru"
-
-# Ссылки на файлы для обновления
-excel_files = [
-    r"R:\Конкурентный анализ\Ценовые индексы\1. Фактический индекс Магнит к Конкурентам\1. Основной_ММ\Парсинг\Детали SKU\202521_ММ_Пятёрочка_Магазин_SKU.xlsx",
-    r"R:\Конкурентный анализ\Ценовые индексы\1. Фактический индекс Магнит к Конкурентам\1. Основной_ММ\Парсинг\Детали SKU\202521_ММ_Остальные Конкуренты_Магазин_SKU.xlsx",
-]
-outlook = win32.Dispatch("outlook.application")
-
-
-# Задаём отложенный запуск
-schedule.every().wednesday.at("09:00").do(update_all)
+# outlook = win32.Dispatch("outlook.application")
 
 print(
-    f"{get_current_time()}Данный скрипт предназначен для автоматического обновления отчётов с индексами"
+    f"{get_current_time()}Данный скрипт предназначен для автоматического обновления отчётов Excel"
+)
+print(
+    f"{get_current_time()}В папке с этим скриптом должен находится один текстовый файл с путями к excel файлам"
 )
 
+mail = input(f"{get_current_time()}Введите почту на которую будет отправленно сообщение: ")
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 while True:
-    update_now = input(f"{get_current_time()}Обновить сейчас файлы? (y/n): ")
-    if update_now == "y":
-        update_all()
-        print(f"{get_current_time()}Ожидаем среду")
-        break
-    elif update_now == "n":
-        print(f"{get_current_time()}Ожидаем среду")
-        break
+    txt_files = [f for f in os.listdir(current_dir) if f.endswith('.txt')]
+
+    if not txt_files:
+        print(f'{get_current_time()}Нет текстовых файлов')
+    elif len(txt_files) == 1:
+        print(f"{get_current_time()}Найден файл {txt_files[0]}")
+        file_path = os.path.join(current_dir, txt_files[0])
+        with open(file_path, 'r', encoding='utf-8') as file:
+            excel_files = [e.strip() for e in file.readlines() if os.path.exists(e.strip()) and e.strip().endswith('.xlsx')]
+        
+        if not excel_files:
+            print(f'{get_current_time()}В файле нет корректный путей.')
+        else:
+            print(f'{get_current_time()}Начинаю обновлять файлы')
+            break
     else:
-        print("Нужно вводить только y или n")
+        print(f"{get_current_time()}Файлов два и более, оставьте один")
+    
+    sleep(15)
 
-while True:
-    schedule.run_pending()
-    sleep(1)
+update_all(excel_files)
