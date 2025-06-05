@@ -4,6 +4,7 @@ import os
 from time import sleep
 from datetime import datetime
 
+
 # Функция для отправки сообщения на почту
 def send_message_to_me(sender, message):
     mail = outlook.CreateItem(0)
@@ -43,34 +44,46 @@ def update_all(my_excel_files):
     send_message_to_me(mail, "Успешно обновили файлы")
 
 
-# outlook = win32.Dispatch("outlook.application")
+outlook = win32.Dispatch("outlook.application")
 
-print_with_time("Данный скрипт предназначен для автоматического обновления отчётов Excel")
-print_with_time("В папке с этим скриптом должен находится один текстовый файл с путями к excel файлам")
+print_with_time(
+    "Данный скрипт предназначен для автоматического обновления отчётов Excel"
+)
+print_with_time(
+    "В папке с этим скриптом должен находится один текстовый файл с путями к excel файлам"
+)
 
-mail = input(f"[{datetime.now().strftime('%d/%m/%Y, %H:%M')}] Введите почту на которую будет отправленно сообщение: ")
+mail = input(
+    f"[{datetime.now().strftime('%d/%m/%Y, %H:%M')}] Введите почту на которую будет отправленно сообщение: "
+)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 while True:
-    txt_files = [f for f in os.listdir(current_dir) if f.endswith('.txt')]
+    txt_files = [f for f in os.listdir(current_dir) if f.endswith(".txt")]
 
     if not txt_files:
         print_with_time("Нет текстовых файлов")
     elif len(txt_files) == 1:
-        print_with_time("Найден файл {txt_files[0]}")
+        print_with_time(f"Найден файл {txt_files[0]}")
         file_path = os.path.join(current_dir, txt_files[0])
-        with open(file_path, 'r', encoding='utf-8') as file:
-            excel_files = [e.strip() for e in file.readlines() if os.path.exists(e.strip()) and e.strip().endswith('.xlsx')]
-        
+        with open(file_path, "r", encoding="utf-8") as file:
+            excel_files = [
+                e.strip()
+                for e in file.readlines()
+                if os.path.exists(e.strip())
+                and (e.strip().endswith(".xlsx") or e.strip().endswith(".xlsm"))
+            ]
+
         if not excel_files:
-            print_with_time("В файле нет корректный путей.")
+            print_with_time("В файле нет корректных путей.")
+            sleep(15)
         else:
             print_with_time("Начинаю обновлять файлы")
             break
     else:
         print_with_time("Файлов два и более, оставьте один")
-    
+
     sleep(15)
 
 update_all(excel_files)
